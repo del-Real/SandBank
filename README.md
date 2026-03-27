@@ -2,9 +2,7 @@
 
 > Your time is the most valuable currency.
 
-SandBank is a full-stack web application for managing and tracking activities. Built with ASP.NET on the backend and React on the frontend, with JWT-based authentication.
-
----
+Full-stack web application for managing and tracking activities. Built with ASP.NET on the backend and React on the frontend, with JWT-based authentication.
 
 ## Tech Stack
 
@@ -23,8 +21,6 @@ SandBank is a full-stack web application for managing and tracking activities. B
 - Axios — HTTP client
 - TanStack Query — data fetching and caching
 - React Router — client-side routing
-
----
 
 ## Project Structure
 
@@ -54,8 +50,6 @@ SandBank/
 └── USER_GUIDE.md               # User guide
 ```
 
----
-
 ## Getting Started
 
 ### Requirements
@@ -64,14 +58,14 @@ SandBank/
 - [Node.js 18+](https://nodejs.org)
 - [Git](https://git-scm.com)
 
-### 1. Clone the repository
+### Clone the repository
 
 ```bash
 git clone <your-repository-url>
 cd SandBank
 ```
 
-### 2. Backend setup
+### Backend setup
 
 ```bash
 cd SandBank.API
@@ -98,9 +92,7 @@ Run the API:
 dotnet run
 ```
 
-API runs at **http://localhost:5156**
-
-### 3. Frontend setup
+### Frontend setup
 
 Open a new terminal:
 
@@ -109,5 +101,3 @@ cd sandbank-client
 npm install
 npm run dev
 ```
-
-App runs at **http://localhost:5173**
