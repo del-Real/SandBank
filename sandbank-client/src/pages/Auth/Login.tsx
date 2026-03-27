@@ -3,10 +3,10 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-export function Register() {
+export function Login() {
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,9 +14,8 @@ export function Register() {
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post("/auth/register", {
+      const response = await axiosInstance.post("/auth/login", {
         email,
-        username,
         password,
       });
       login(response.data.token, {
@@ -27,24 +26,19 @@ export function Register() {
       // redirect to home after login
       navigate("/");
     } catch (error: any) {
-      console.error("Registration failed", error.response?.data);
+      setError("Invalid email or password");
+      console.error("Login failed", error.response?.data);
     }
   };
 
   return (
-    <div className="user-register-card">
-      <form onSubmit={handleSubmit} className="user-register-form">
+    <div className="user-login-card">
+      <form onSubmit={handleSubmit} className="user-login-form">
         <label>Email</label>
         <input
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-        />
-        <label>Username</label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
         />
         <label>Password</label>
         <input
@@ -52,8 +46,9 @@ export function Register() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Sign up</button>
+        <button type="submit">Log in</button>
       </form>
+      {error && <p className="error">{error}</p>}
     </div>
   );
 }
