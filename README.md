@@ -2,17 +2,18 @@
 
 > Your time is the most valuable currency.
 
-Full-stack web application for managing and tracking activities. Built with ASP.NET on the backend and React on the frontend, with JWT-based authentication.
+Full-stack Time Bank web application where users exchange services using time credits. Built with FastAPI on the backend and React on the frontend, with JWT-based authentication.
 
 ## Tech Stack
 
 **Backend**
 
-- ASP.NET Core — REST API
-- Entity Framework Core — ORM
+- FastAPI — REST API
+- SQLAlchemy — ORM
+- Alembic — database migrations
 - SQLite — database
-- JWT — token-based authentication
-- BCrypt — password hashing
+- python-jose — JWT token-based authentication
+- bcrypt — password hashing
 
 **Frontend**
 
@@ -26,35 +27,55 @@ Full-stack web application for managing and tracking activities. Built with ASP.
 
 ```
 SandBank/
-├── SandBank.API/               # ASP.NET backend
-│   ├── Controllers/            # API endpoints
-│   ├── Services/               # Business logic
-│   ├── Models/                 # Database entities
-│   ├── DTOs/                   # Data transfer objects
-│   ├── Data/                   # DbContext
-│   ├── Migrations/             # EF Core migrations
-│   ├── Program.cs              # App configuration
-│   └── appsettings.json        # App settings
+├── SandBank.API/               # FastAPI backend
+│   ├── routers/                # API endpoints
+│   │   ├── auth.py
+│   │   ├── users.py
+│   │   ├── activities.py
+│   │   ├── requests.py
+│   │   └── transactions.py
+│   ├── services/               # Business logic
+│   │   ├── auth_service.py
+│   │   ├── user_service.py
+│   │   ├── activity_service.py
+│   │   ├── request_service.py
+│   │   ├── transaction_service.py
+│   │   ├── token_service.py
+│   │   └── dependencies.py
+│   ├── models/                 # SQLAlchemy models
+│   │   ├── user.py
+│   │   ├── activity.py
+│   │   ├── user_activity.py
+│   │   ├── service_request.py
+│   │   └── transaction.py
+│   ├── schemas/                # Pydantic schemas (DTOs)
+│   │   ├── auth.py
+│   │   ├── user.py
+│   │   ├── activity.py
+│   │   ├── service_request.py
+│   │   └── transaction.py
+│   ├── database.py             # DB session and engine
+│   ├── config.py               # Settings from .env
+│   ├── main.py                 # App entry point
+│   ├── requirements.txt
+│   └── .env                    # Secret keys (not committed)
 │
 ├── sandbank-client/            # React frontend
 │   └── src/
-│       ├── api/                # Axios instance
+│       ├── api/                # Axios instance + API calls
 │       ├── context/            # Auth context
-│       ├── hooks/              # TanStack Query hooks
 │       ├── pages/              # Page components
-│       ├── components/         # Shared components
 │       ├── App.tsx             # Routes
 │       └── main.tsx            # Entry point
 │
-├── API.md                      # API documentation
-└── USER_GUIDE.md               # User guide
+└── README.md
 ```
 
 ## Getting Started
 
 ### Requirements
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Python 3.12+](https://www.python.org/downloads/)
 - [Node.js 18+](https://nodejs.org)
 - [Git](https://git-scm.com)
 
@@ -71,26 +92,39 @@ cd SandBank
 cd SandBank.API
 ```
 
-Set your JWT secret key:
+Create and activate a virtual environment:
 
 ```bash
-dotnet user-secrets init
-dotnet user-secrets set "Jwt:SecretKey" "your-generated-secret-key"
+python3 -m venv venv
+source venv/bin/activate        # Linux/Mac
+venv\Scripts\activate           # Windows
 ```
 
-> Generate a secure key with: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-
-Apply database migrations:
+Install dependencies:
 
 ```bash
-dotnet ef database update
+pip install -r requirements.txt
 ```
+
+Create a `.env` file in `SandBank.API/`:
+
+```env
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+DATABASE_URL=sqlite:///./sandbank.db
+```
+
+> Generate a secure key with: `python3 -c "import secrets; print(secrets.token_hex(32))"`
 
 Run the API:
 
 ```bash
-dotnet run
+uvicorn main:app --reload
 ```
+
+The API will be available at `http://localhost:8000`.
+Interactive docs at `http://localhost:8000/docs`.
 
 ### Frontend setup
 
@@ -101,3 +135,42 @@ cd sandbank-client
 npm install
 npm run dev
 ```
+
+The app will be available at `http://localhost:5173`.
+
+## API Overview
+
+| Method | Endpoint                      | Auth  | Description                                 |
+| ------ | ----------------------------- | ----- | ------------------------------------------- |
+| POST   | `/api/auth/register`          | No    | Register a new user                         |
+| POST   | `/api/auth/login`             | No    | Login and get JWT token                     |
+| GET    | `/api/users/me`               | Yes   | Get my profile                              |
+| PUT    | `/api/users/me`               | Yes   | Update my profile                           |
+| PUT    | `/api/users/me/password`      | Yes   | Change password                             |
+| GET    | `/api/users/me/balance`       | Yes   | Get my credit balance                       |
+| GET    | `/api/users/`                 | Admin | List all users                              |
+| DELETE | `/api/users/{id}`             | Admin | Delete a user                               |
+| GET    | `/api/activities/`            | No    | List activities (supports filtering)        |
+| POST   | `/api/activities/`            | Yes   | Create an activity                          |
+| PUT    | `/api/activities/{id}`        | Yes   | Update activity (owner only)                |
+| DELETE | `/api/activities/{id}`        | Yes   | Delete activity (owner or admin)            |
+| POST   | `/api/requests/`              | Yes   | Request a service                           |
+| GET    | `/api/requests/me`            | Yes   | My outgoing requests                        |
+| GET    | `/api/requests/incoming`      | Yes   | Incoming requests on my activities          |
+| PUT    | `/api/requests/{id}/accept`   | Yes   | Accept a request (triggers credit transfer) |
+| PUT    | `/api/requests/{id}/reject`   | Yes   | Reject a request                            |
+| PUT    | `/api/requests/{id}/cancel`   | Yes   | Cancel a request                            |
+| PUT    | `/api/requests/{id}/complete` | Yes   | Mark a request as complete                  |
+| GET    | `/api/transactions/me`        | Yes   | My transaction history                      |
+
+## How Time Credits Work
+
+- Every new user starts with **20 credits**.
+- 1 hour of service = 1 credit.
+- When a service request is **accepted**, credits transfer instantly from requester to provider.
+- Credits are logged as transactions for full history tracking.
+
+## Notes
+
+- `venv/` and `.env` are not committed — recreate them on each machine using the steps above.
+- The SQLite database file `sandbank.db` is created automatically on first run.
