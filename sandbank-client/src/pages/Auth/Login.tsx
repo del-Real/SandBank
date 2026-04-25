@@ -19,9 +19,11 @@ export function Login() {
         password,
       });
       login(response.data.token, {
+        id: response.data.id,
         username: response.data.username,
         email: response.data.email,
         expiresAt: response.data.expiresAt,
+        role: response.data.role,
       });
       // redirect to home after login
       navigate("/");

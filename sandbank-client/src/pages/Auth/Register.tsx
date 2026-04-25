@@ -20,9 +20,11 @@ export function Register() {
         password,
       });
       login(response.data.token, {
+        id: response.data.id,
         username: response.data.username,
         email: response.data.email,
-        expiresAt: response.data.expiresAt,
+        expiresAt: response.data.expires_at,
+        role: response.data.role,
       });
       // redirect to home after login
       navigate("/");

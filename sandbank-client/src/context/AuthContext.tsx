@@ -3,10 +3,13 @@ import type { ReactNode } from "react";
 
 // User object shape
 interface User {
+  id: number;
   username: string;
   email: string;
   expiresAt: string;
+  role: string;
 }
+
 interface AuthContextType {
   user: User | null; // current user (null if not logged in)
   token: string | null; // JWT token (null if not logged in)
