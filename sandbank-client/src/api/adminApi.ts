@@ -23,3 +23,9 @@ export const deleteActivity = (id: number) =>
 
 export const getAdminTransactions = () =>
   axiosInstance.get("/admin/transactions");
+
+export const getAdminRatings = () =>
+  axiosInstance.get("/admin/ratings");
+
+export const deleteRating = (id: number) =>
+  axiosInstance.delete(`/admin/ratings/${id}`);

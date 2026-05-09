@@ -4,9 +4,11 @@ from database import get_db
 from schemas.user import UserSchema
 from schemas.activity import ActivitySchema
 from schemas.transaction import TransactionSchema
+from schemas.rating import RatingSchema
 from services import admin_service
 from services.dependencies import require_admin
 from models.user import User
+from models.rating import Rating
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -105,3 +107,24 @@ def get_all_transactions(
     db: Session = Depends(get_db), _: User = Depends(require_admin)
 ):
     return admin_service.get_all_transactions(db)
+
+
+# ── Ratings ──────────────────────────────────────────
+
+
+@router.get("/ratings", response_model=list[RatingSchema])
+def get_all_ratings(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    return db.query(Rating).order_by(Rating.created_at.desc()).all()
+
+
+@router.delete("/ratings/{rating_id}", status_code=204)
+def delete_rating(
+    rating_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    rating = db.query(Rating).filter(Rating.id == rating_id).first()
+    if not rating:
+        raise HTTPException(status_code=404, detail="Rating not found")
+    db.delete(rating)
+    db.commit()

@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import {
   getAdminStats, getAdminUsers, setUserActive, setUserRole,
   getAdminActivities, setActivityVisible, deleteActivity,
-  getAdminTransactions
+  getAdminTransactions, getAdminRatings, deleteRating
 } from "../../api/adminApi";
 
-type Tab = "stats" | "users" | "activities" | "transactions";
+type Tab = "stats" | "users" | "activities" | "transactions" | "ratings";
 
 export function AdminPanel() {
   const { user } = useAuth();
@@ -17,9 +17,9 @@ export function AdminPanel() {
   const [users, setUsers] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [ratings, setRatings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // redirect non-admins
   useEffect(() => {
     if (user?.role !== "Admin") navigate("/");
   }, [user]);
@@ -41,6 +41,9 @@ export function AdminPanel() {
       } else if (t === "transactions") {
         const res = await getAdminTransactions();
         setTransactions(res.data);
+      } else if (t === "ratings") {
+        const res = await getAdminRatings();
+        setRatings(res.data);
       }
     } catch {
       alert("Failed to load data");
@@ -70,13 +73,19 @@ export function AdminPanel() {
     setActivities(prev => prev.filter(a => a.id !== id));
   };
 
+  const handleDeleteRating = async (id: number) => {
+    if (!confirm("Delete this review?")) return;
+    await deleteRating(id);
+    setRatings(prev => prev.filter(r => r.id !== id));
+  };
+
   return (
     <>
       <h3>Admin Panel</h3>
       <hr />
 
       <div className="admin-tabs">
-        {(["stats", "users", "activities", "transactions"] as Tab[]).map(t => (
+        {(["stats", "users", "activities", "transactions", "ratings"] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -234,6 +243,50 @@ export function AdminPanel() {
                   <td>{t.amount} credits</td>
                   <td>{t.description}</td>
                   <td>{new Date(t.created_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Ratings ── */}
+      {tab === "ratings" && (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Request</th>
+                <th>Reviewer</th>
+                <th>Reviewee</th>
+                <th>Stars</th>
+                <th>Review</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ratings.map(r => (
+                <tr key={r.id}>
+                  <td>{r.id}</td>
+                  <td>#{r.service_request_id}</td>
+                  <td>#{r.reviewer_id}</td>
+                  <td>#{r.reviewee_id}</td>
+                  <td>
+                    {"★".repeat(r.stars)}
+                    {"☆".repeat(5 - r.stars)}
+                  </td>
+                  <td>{r.review || <em style={{ color: "#aaa" }}>no review</em>}</td>
+                  <td>{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDeleteRating(r.id)}
+                      style={{ color: "red" }}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
