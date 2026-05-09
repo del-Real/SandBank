@@ -7,6 +7,8 @@ import { ActivityForm } from "./pages/Activities/ActivityForm";
 import { MyRequests } from "./pages/Requests/MyRequests";
 import { IncomingRequests } from "./pages/Requests/IncomingRequests";
 import { TransactionHistory } from "./pages/Transactions/TransactionHistory";
+import { BuyCredits } from "./pages/Credits/BuyCredits";
+import { AdminPanel } from "./pages/Admin/AdminPanel";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import SandBank_logo from "./assets/SandBank_logo.svg";
 import "./App.css";
@@ -28,6 +30,10 @@ function Nav() {
               <Link to="/requests/mine">My Requests</Link>
               <Link to="/requests/incoming">Incoming</Link>
               <Link to="/transactions">Credits</Link>
+              <Link to="/credits">Buy Credits</Link>
+              {user?.role === "Admin" && (
+                <Link to="/admin">Admin</Link>
+              )}
               <span className="nav-username">👤 {user?.username}</span>
               <button className="nav-logout" onClick={logout}>
                 Logout
@@ -62,6 +68,8 @@ function App() {
             <Route path="/requests/mine" element={<MyRequests />} />
             <Route path="/requests/incoming" element={<IncomingRequests />} />
             <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/credits" element={<BuyCredits />} />
+            <Route path="/admin" element={<AdminPanel />} />
           </Routes>
         </main>
       </AuthProvider>

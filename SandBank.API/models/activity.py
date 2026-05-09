@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
+
 
 class Activity(Base):
     __tablename__ = "activities"
@@ -14,6 +15,6 @@ class Activity(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-
     owner = relationship("User", back_populates="activities")
     service_requests = relationship("ServiceRequest", back_populates="activity")
+    is_visible = Column(Boolean, nullable=False, default=True)

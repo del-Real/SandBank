@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
 
+
 class ServiceRequest(Base):
     __tablename__ = "service_requests"
 
@@ -12,7 +13,11 @@ class ServiceRequest(Base):
     status = Column(String, nullable=False, default="pending")
     # pending | accepted | rejected | cancelled | completed
     created_at = Column(DateTime, default=datetime.utcnow)
-
     activity = relationship("Activity", back_populates="service_requests")
-    requester = relationship("User", foreign_keys=[requester_id], back_populates="service_requests")
-    transaction = relationship("Transaction", back_populates="service_request", uselist=False)
+    requester = relationship(
+        "User", foreign_keys=[requester_id], back_populates="service_requests"
+    )
+    transaction = relationship(
+        "Transaction", back_populates="service_request", uselist=False
+    )
+    rating = relationship("Rating", back_populates="service_request", uselist=False)
