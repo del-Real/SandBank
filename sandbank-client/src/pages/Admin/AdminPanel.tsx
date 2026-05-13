@@ -2,9 +2,16 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
-  getAdminStats, getAdminUsers, setUserActive, setUserRole,
-  getAdminActivities, setActivityVisible, deleteActivity,
-  getAdminTransactions, getAdminRatings, deleteRating
+  getAdminStats,
+  getAdminUsers,
+  setUserActive,
+  setUserRole,
+  getAdminActivities,
+  setActivityVisible,
+  deleteActivity,
+  getAdminTransactions,
+  getAdminRatings,
+  deleteRating,
 } from "../../api/adminApi";
 
 type Tab = "stats" | "users" | "activities" | "transactions" | "ratings";
@@ -24,7 +31,9 @@ export function AdminPanel() {
     if (user?.role !== "Admin") navigate("/");
   }, [user]);
 
-  useEffect(() => { loadTab(tab); }, [tab]);
+  useEffect(() => {
+    loadTab(tab);
+  }, [tab]);
 
   const loadTab = async (t: Tab) => {
     setLoading(true);
@@ -54,38 +63,45 @@ export function AdminPanel() {
 
   const handleSetActive = async (id: number, is_active: boolean) => {
     await setUserActive(id, is_active);
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, is_active } : u));
+    setUsers((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, is_active } : u)),
+    );
   };
 
   const handleSetRole = async (id: number, role: string) => {
     await setUserRole(id, role);
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u));
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
   };
 
   const handleSetVisible = async (id: number, is_visible: boolean) => {
     await setActivityVisible(id, is_visible);
-    setActivities(prev => prev.map(a => a.id === id ? { ...a, is_visible } : a));
+    setActivities((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, is_visible } : a)),
+    );
   };
 
   const handleDeleteActivity = async (id: number) => {
     if (!confirm("Delete this activity permanently?")) return;
     await deleteActivity(id);
-    setActivities(prev => prev.filter(a => a.id !== id));
+    setActivities((prev) => prev.filter((a) => a.id !== id));
   };
 
   const handleDeleteRating = async (id: number) => {
     if (!confirm("Delete this review?")) return;
     await deleteRating(id);
-    setRatings(prev => prev.filter(r => r.id !== id));
+    setRatings((prev) => prev.filter((r) => r.id !== id));
   };
 
   return (
     <>
-      <h3>Admin Panel</h3>
-      <hr />
+      <div className="page-header">
+        <h3>Admin Panel</h3>
+      </div>
 
       <div className="admin-tabs">
-        {(["stats", "users", "activities", "transactions", "ratings"] as Tab[]).map(t => (
+        {(
+          ["stats", "users", "activities", "transactions", "ratings"] as Tab[]
+        ).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -148,7 +164,7 @@ export function AdminPanel() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => (
+              {users.map((u) => (
                 <tr key={u.id}>
                   <td>{u.id}</td>
                   <td>{u.username}</td>
@@ -156,7 +172,7 @@ export function AdminPanel() {
                   <td>
                     <select
                       value={u.role}
-                      onChange={e => handleSetRole(u.id, e.target.value)}
+                      onChange={(e) => handleSetRole(u.id, e.target.value)}
                     >
                       <option value="User">User</option>
                       <option value="Admin">Admin</option>
@@ -187,23 +203,25 @@ export function AdminPanel() {
                 <th>ID</th>
                 <th>Title</th>
                 <th>Owner</th>
-                <th>Duration</th>
+                <th>Price</th>
                 <th>Visible</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {activities.map(a => (
+              {activities.map((a) => (
                 <tr key={a.id}>
                   <td>{a.id}</td>
                   <td>{a.title}</td>
                   <td>#{a.owner_id}</td>
-                  <td>{a.duration}h</td>
+                  <td>{a.duration}</td>
                   <td style={{ color: a.is_visible ? "green" : "red" }}>
                     {a.is_visible ? "Visible" : "Hidden"}
                   </td>
                   <td className="admin-actions">
-                    <button onClick={() => handleSetVisible(a.id, !a.is_visible)}>
+                    <button
+                      onClick={() => handleSetVisible(a.id, !a.is_visible)}
+                    >
                       {a.is_visible ? "Hide" : "Show"}
                     </button>
                     <button
@@ -235,7 +253,7 @@ export function AdminPanel() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map(t => (
+              {transactions.map((t) => (
                 <tr key={t.id}>
                   <td>{t.id}</td>
                   <td>#{t.sender_id}</td>
@@ -267,7 +285,7 @@ export function AdminPanel() {
               </tr>
             </thead>
             <tbody>
-              {ratings.map(r => (
+              {ratings.map((r) => (
                 <tr key={r.id}>
                   <td>{r.id}</td>
                   <td>#{r.service_request_id}</td>
@@ -277,7 +295,9 @@ export function AdminPanel() {
                     {"★".repeat(r.stars)}
                     {"☆".repeat(5 - r.stars)}
                   </td>
-                  <td>{r.review || <em style={{ color: "#aaa" }}>no review</em>}</td>
+                  <td>
+                    {r.review || <em style={{ color: "#aaa" }}>no review</em>}
+                  </td>
                   <td>{new Date(r.created_at).toLocaleDateString()}</td>
                   <td>
                     <button

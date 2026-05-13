@@ -19,35 +19,45 @@ function Nav() {
   return (
     <header>
       <div className="top-header">
-        <Link to="/">
-          <img src={SandBank_logo} className="logo" alt="SandBank logo" />
-        </Link>
-        <nav className="nav-links">
+        {/* Left: Logo */}
+        <div className="nav-left">
+          <Link to="/">
+            <img src={SandBank_logo} className="logo" alt="SandBank logo" />
+          </Link>
+        </div>
+
+        {/* Center: Main nav links */}
+        <nav className="nav-center">
           <Link to="/activities">Activities</Link>
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <>
-              <Link to="/activities/new">+ New</Link>
-              <Link to="/requests/mine">My Requests</Link>
-              <Link to="/requests/incoming">Incoming</Link>
-              <Link to="/transactions">Credits</Link>
-              <Link to="/credits">Buy Credits</Link>
-              {user?.role === "Admin" && (
-                <Link to="/admin">Admin</Link>
-              )}
-              <span className="nav-username">👤 {user?.username}</span>
-              <button className="nav-logout" onClick={logout}>
-                Logout
-              </button>
+              <Link to="/requests/mine">Requests</Link>
+              <Link to="/transactions">History</Link>
+              {user?.role === "Admin" && <Link to="/admin">— Admin Panel</Link>}
             </>
-          ) : (
+          )}
+          {!isAuthenticated && (
             <>
-              <Link to="/register">Register</Link>
-              <Link to="/login">Login</Link>
+              <Link to="/login">Log in</Link>
+              <Link to="/register">Sign up</Link>
             </>
           )}
         </nav>
+
+        {/* Right: User info */}
+        <div className="nav-right">
+          {isAuthenticated ? (
+            <>
+              <span className="nav-username">{user?.username}</span>
+              <button className="nav-logout" onClick={logout}>
+                Log out
+              </button>
+            </>
+          ) : (
+            <div /> /* keeps layout balanced when logged out */
+          )}
+        </div>
       </div>
-      <hr className="top-divider" />
     </header>
   );
 }

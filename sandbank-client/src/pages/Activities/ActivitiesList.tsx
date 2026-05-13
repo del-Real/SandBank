@@ -54,8 +54,14 @@ export function ActivitiesList() {
 
   return (
     <>
-      <h3>Activities</h3>
-      <hr />
+      <div className="page-header">
+        <h3>Activities</h3>
+        {isAuthenticated && (
+          <button onClick={() => navigate("/activities/new")}>
+            + New Activity
+          </button>
+        )}
+      </div>
 
       <div className="filters">
         <input
@@ -64,44 +70,53 @@ export function ActivitiesList() {
           onChange={(e) => setTitleFilter(e.target.value)}
         />
         <input
-          placeholder="Max duration (hours)"
+          placeholder="Max price (tokens)"
           type="number"
           value={durationFilter}
           onChange={(e) => setDurationFilter(e.target.value)}
         />
-        <button onClick={fetchActivities}>Search</button>
-        {isAuthenticated && (
-          <button onClick={() => navigate("/activities/new")}>
-            + New Activity
-          </button>
-        )}
+        <button className="secondary" onClick={fetchActivities}>
+          Search
+        </button>
       </div>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="loading">Loading activities...</p>}
+
+      {!loading && activities.length === 0 && (
+        <p className="empty-state">No activities found.</p>
+      )}
 
       <div className="activities-grid">
         {activities.map((activity) => (
           <div key={activity.id} className="activity-card">
             <h4>{activity.title}</h4>
             <p>{activity.description}</p>
-            <p>{activity.duration}h</p>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Price: {activity.duration}
+            </p>
 
-            {isAuthenticated && activity.owner_id === user?.id ? (
-              <div>
-                <button
-                  onClick={() => navigate(`/activities/${activity.id}/edit`)}
-                >
-                  Edit
+            <div className="card-actions">
+              {isAuthenticated && activity.owner_id === user?.id ? (
+                <>
+                  <button
+                    className="secondary"
+                    onClick={() => navigate(`/activities/${activity.id}/edit`)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="danger"
+                    onClick={() => handleDelete(activity.id)}
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : isAuthenticated ? (
+                <button onClick={() => handleRequest(activity.id)}>
+                  Request
                 </button>
-                <button onClick={() => handleDelete(activity.id)}>
-                  Delete
-                </button>
-              </div>
-            ) : isAuthenticated ? (
-              <button onClick={() => handleRequest(activity.id)}>
-                Request
-              </button>
-            ) : null}
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

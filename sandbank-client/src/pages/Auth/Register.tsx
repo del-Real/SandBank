@@ -36,23 +36,30 @@ export function Register() {
   return (
     <div className="user-register-card">
       <form onSubmit={handleSubmit} className="user-register-form">
+        <h3>Create account</h3>
         <label>Email</label>
         <input
-          type="text"
+          type="email"
+          placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <label>Username</label>
         <input
           type="text"
+          placeholder="Choose a username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
         />
         <label>Password</label>
         <input
           type="password"
+          placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
         <button type="submit">Sign up</button>
       </form>

@@ -50,27 +50,41 @@ export function IncomingRequests() {
 
   return (
     <>
-      <h3>Incoming Requests</h3>
-      <hr />
-      {loading && <p>Loading...</p>}
-      {requests.length === 0 && !loading && <p>No incoming requests.</p>}
+      <div className="page-header">
+        <h3>Incoming Requests</h3>
+      </div>
+      {loading && <p className="loading">Loading...</p>}
+      {requests.length === 0 && !loading && (
+        <p className="empty-state">No incoming requests.</p>
+      )}
       <div className="requests-list">
         {requests.map((r) => (
           <div key={r.id} className="request-card">
-            <p>Activity #{r.activity_id}</p>
+            <p>
+              <strong>Activity #{r.activity_id}</strong>
+            </p>
             <p>From user #{r.requester_id}</p>
             <p>
-              Status: <strong>{r.status}</strong>
+              Status:{" "}
+              <span className={`badge badge-${r.status}`}>{r.status}</span>
             </p>
-            <p>Date: {new Date(r.created_at).toLocaleDateString()}</p>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              {new Date(r.created_at).toLocaleDateString()}
+            </p>
             {r.status === "pending" && (
-              <div>
-                <button onClick={() => handleAccept(r.id)}>Accept</button>
-                <button onClick={() => handleReject(r.id)}>Reject</button>
+              <div className="card-actions">
+                <button className="success" onClick={() => handleAccept(r.id)}>
+                  Accept
+                </button>
+                <button className="danger" onClick={() => handleReject(r.id)}>
+                  Reject
+                </button>
               </div>
             )}
             {r.status === "accepted" && (
-              <button onClick={() => handleComplete(r.id)}>Complete</button>
+              <button onClick={() => handleComplete(r.id)}>
+                Mark Complete
+              </button>
             )}
           </div>
         ))}

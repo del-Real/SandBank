@@ -56,6 +56,7 @@ export function ActivityForm() {
         <label>Title</label>
         <input
           value={title}
+          placeholder="What do you offer?"
           onChange={(e) => setTitle(e.target.value)}
           required
         />
@@ -63,14 +64,16 @@ export function ActivityForm() {
         <label>Description</label>
         <textarea
           value={description}
+          placeholder="Describe the activity..."
           onChange={(e) => setDescription(e.target.value)}
           required
         />
 
-        <label>Duration (hours)</label>
+        <label>Price (tokens)</label>
         <input
           type="number"
           min="1"
+          placeholder="e.g. 2"
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
           required
@@ -88,7 +91,11 @@ export function ActivityForm() {
         <button type="submit">
           {isEditing ? "Save Changes" : "Create Activity"}
         </button>
-        <button type="button" onClick={() => navigate("/activities")}>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => navigate("/activities")}
+        >
           Cancel
         </button>
       </form>

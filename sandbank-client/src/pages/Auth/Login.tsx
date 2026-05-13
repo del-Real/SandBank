@@ -36,21 +36,26 @@ export function Login() {
   return (
     <div className="user-login-card">
       <form onSubmit={handleSubmit} className="user-login-form">
+        <h3>Log in</h3>
         <label>Email</label>
         <input
-          type="text"
+          type="email"
+          placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <label>Password</label>
         <input
           type="password"
+          placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
+        {error && <p className="error">{error}</p>}
         <button type="submit">Log in</button>
       </form>
-      {error && <p className="error">{error}</p>}
     </div>
   );
 }

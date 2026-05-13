@@ -3,9 +3,9 @@ import { useSearchParams } from "react-router-dom";
 import { createCheckout, type CreditPack } from "../../api/paymentsApi";
 
 const PACKS = [
-  { id: "starter",  label: "Starter",  credits: 10, price: "€5"  },
+  { id: "starter", label: "Starter", credits: 10, price: "€5" },
   { id: "standard", label: "Standard", credits: 25, price: "€10" },
-  { id: "pro",      label: "Pro",      credits: 60, price: "€20" },
+  { id: "pro", label: "Pro", credits: 60, price: "€20" },
 ];
 
 export function BuyCredits() {
@@ -27,20 +27,29 @@ export function BuyCredits() {
 
   return (
     <>
-      <h3>Buy Time Credits</h3>
-      <hr />
+      <div className="page-header">
+        <h3>Buy Time Credits</h3>
+      </div>
 
       {status === "success" && (
-        <p style={{ color: "green" }}>
+        <p
+          className="badge badge-completed"
+          style={{ marginBottom: "1rem", display: "inline-block" }}
+        >
           Payment successful! Credits will appear in your balance shortly.
         </p>
       )}
       {status === "cancelled" && (
-        <p style={{ color: "gray" }}>Payment cancelled.</p>
+        <p
+          className="badge badge-cancelled"
+          style={{ marginBottom: "1rem", display: "inline-block" }}
+        >
+          Payment cancelled.
+        </p>
       )}
 
       <div className="packs-grid">
-        {PACKS.map(pack => (
+        {PACKS.map((pack) => (
           <div key={pack.id} className="pack-card">
             <h4>{pack.label}</h4>
             <p className="pack-credits">{pack.credits} credits</p>
@@ -49,7 +58,7 @@ export function BuyCredits() {
               onClick={() => handleBuy(pack.id as CreditPack)}
               disabled={loading === pack.id}
             >
-              {loading === pack.id ? "Redirecting..." : "Buy"}
+              {loading === pack.id ? "Redirecting..." : "Buy Now"}
             </button>
           </div>
         ))}
