@@ -166,7 +166,7 @@ The app will be available at `http://localhost:5173`.
 ## How Time Credits Work
 
 - Every new user starts with **20 credits**.
-- 1 hour of service = 1 credit.
+- 1 time token does not traslate to 1 hour of service, value your work as you consider.
 - When a service request is **accepted**, credits transfer instantly from requester to provider.
 - Credits are logged as transactions for full history tracking.
 
