@@ -1,176 +1,295 @@
 # SandBank
 
-> Your time is the most valuable currency.
+## Purpose
 
-Full-stack Time Bank web application where users exchange services using time credits. Built with FastAPI on the backend and React on the frontend, with JWT-based authentication.
+This guide brings up the current local development environment for the repository as implemented today:
 
-## Tech Stack
+- Backend: FastAPI on `http://localhost:8000`
+- Frontend: Vite on `http://localhost:5173`
+- Default database: SQLite file created locally on first run
 
-**Backend**
+## Prerequisites
 
-- FastAPI — REST API
-- SQLAlchemy — ORM
-- Alembic — database migrations
-- SQLite — database
-- python-jose — JWT token-based authentication
-- bcrypt — password hashing
+| Requirement | Recommended version | Why it is needed                    |
+| ----------- | ------------------- | ----------------------------------- |
+| Python      | 3.10 or newer       | FastAPI backend runtime             |
+| Node.js     | 18 or newer         | Frontend tooling and dev server     |
+| npm         | 9 or newer          | Frontend package manager            |
+| Git         | any recent version  | Cloning and updating the repository |
 
-**Frontend**
+Optional:
 
-- React + TypeScript
-- Vite — build tool
-- Axios — HTTP client
-- TanStack Query — data fetching and caching
-- React Router — client-side routing
+- Stripe account and Stripe CLI if you want to test credit purchases end to end
 
-## Project Structure
+## Quick Start
 
-```
-SandBank/
-├── SandBank.API/               # FastAPI backend
-│   ├── routers/                # API endpoints
-│   │   ├── auth.py
-│   │   ├── users.py
-│   │   ├── activities.py
-│   │   ├── requests.py
-│   │   └── transactions.py
-│   ├── services/               # Business logic
-│   │   ├── auth_service.py
-│   │   ├── user_service.py
-│   │   ├── activity_service.py
-│   │   ├── request_service.py
-│   │   ├── transaction_service.py
-│   │   ├── token_service.py
-│   │   └── dependencies.py
-│   ├── models/                 # SQLAlchemy models
-│   │   ├── user.py
-│   │   ├── activity.py
-│   │   ├── user_activity.py
-│   │   ├── service_request.py
-│   │   └── transaction.py
-│   ├── schemas/                # Pydantic schemas (DTOs)
-│   │   ├── auth.py
-│   │   ├── user.py
-│   │   ├── activity.py
-│   │   ├── service_request.py
-│   │   └── transaction.py
-│   ├── database.py             # DB session and engine
-│   ├── config.py               # Settings from .env
-│   ├── main.py                 # App entry point
-│   ├── requirements.txt
-│   └── .env                    # Secret keys (not committed)
-│
-├── sandbank-client/            # React frontend
-│   └── src/
-│       ├── api/                # Axios instance + API calls
-│       ├── context/            # Auth context
-│       ├── pages/              # Page components
-│       ├── App.tsx             # Routes
-│       └── main.tsx            # Entry point
-│
-└── README.md
-```
-
-## Getting Started
-
-### Requirements
-
-- [Python 3.12+](https://www.python.org/downloads/)
-- [Node.js 18+](https://nodejs.org)
-- [Git](https://git-scm.com)
-
-### Clone the repository
+If you only need a local dev environment, the shortest path is:
 
 ```bash
 git clone <your-repository-url>
-cd SandBank
+cd SandBank-dev
+cd SandBank.API
+python -m venv venv
 ```
 
-### Backend setup
+Activate the virtual environment, install backend packages, create `.env`, run the API, then in a second terminal install frontend packages and run Vite.
+
+## 1. Clone the Repository
+
+```bash
+git clone <your-repository-url>
+cd SandBank-dev
+```
+
+## 2. Backend Setup
+
+### 2.1 Create the virtual environment
 
 ```bash
 cd SandBank.API
+python -m venv venv
 ```
 
-Create and activate a virtual environment:
+### 2.2 Activate it
+
+Windows PowerShell:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+Windows Command Prompt:
+
+```cmd
+venv\Scripts\activate.bat
+```
+
+macOS or Linux:
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate        # Linux/Mac
-venv\Scripts\activate           # Windows
+source venv/bin/activate
 ```
 
-Install dependencies:
+### 2.3 Install backend dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in `SandBank.API/`:
+Installed packages include FastAPI, Uvicorn, SQLAlchemy, JWT tooling, and Stripe support.
+
+### 2.4 Create `.env`
+
+Create `SandBank.API/.env` with the following values:
 
 ```env
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=replace-with-a-long-random-string
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 DATABASE_URL=sqlite:///./sandbank.db
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 ```
 
-> Generate a secure key with: `python3 -c "import secrets; print(secrets.token_hex(32))"`
+| Variable                      | Required | Current role in app                           |
+| ----------------------------- | -------- | --------------------------------------------- |
+| `SECRET_KEY`                  | Yes      | Signs JWT access tokens                       |
+| `ALGORITHM`                   | No       | Defaults to `HS256`                           |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | No       | Defaults to `30`                              |
+| `DATABASE_URL`                | No       | Defaults to local SQLite                      |
+| `STRIPE_SECRET_KEY`           | No       | Required only for `/api/payments/checkout`    |
+| `STRIPE_WEBHOOK_SECRET`       | No       | Required only for Stripe webhook verification |
 
-Run the API:
+Generate a strong secret key with:
 
 ```bash
-uvicorn main:app --reload
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-The API will be available at `http://localhost:8000`.
-Interactive docs at `http://localhost:8000/docs`.
+### 2.5 Database behavior
 
-### Frontend setup
+No manual migration step is required for the default local setup. The backend currently creates tables on startup using SQLAlchemy metadata.
 
-Open a new terminal:
+With the default config, the SQLite database file is created as:
+
+```text
+SandBank.API/sandbank.db
+```
+
+New user accounts created through the API receive a default balance of **20 credits**.
+
+### 2.6 Optional admin bootstrap
+
+To seed the default admin account:
+
+```bash
+python create_admin.py
+```
+
+This script creates the following account if it does not already exist:
+
+| Field            | Value                |
+| ---------------- | -------------------- |
+| Email            | `admin@sandbank.com` |
+| Password         | `admin1234`          |
+| Role             | `Admin`              |
+| Starting balance | `999`                |
+
+This is a development convenience only. Change or remove it outside local testing.
+
+### 2.7 Run the backend
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+Useful URLs:
+
+| URL                           | Purpose                    |
+| ----------------------------- | -------------------------- |
+| `http://localhost:8000/`      | Root health-style response |
+| `http://localhost:8000/docs`  | Swagger UI                 |
+| `http://localhost:8000/redoc` | ReDoc                      |
+
+## 3. Frontend Setup
+
+Open a second terminal from the repository root.
+
+### 3.1 Install frontend dependencies
 
 ```bash
 cd sandbank-client
 npm install
+```
+
+### 3.2 Backend URL used by the frontend
+
+The current client is hard-coded to:
+
+```text
+http://localhost:8000/api
+```
+
+If you change the backend host or port, update `sandbank-client/src/api/axiosInstance.ts` accordingly.
+
+### 3.3 Run the frontend
+
+```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`.
+The default local URL is:
 
-## API Overview
+```text
+http://localhost:5173
+```
 
-| Method | Endpoint                      | Auth  | Description                                 |
-| ------ | ----------------------------- | ----- | ------------------------------------------- |
-| POST   | `/api/auth/register`          | No    | Register a new user                         |
-| POST   | `/api/auth/login`             | No    | Login and get JWT token                     |
-| GET    | `/api/users/me`               | Yes   | Get my profile                              |
-| PUT    | `/api/users/me`               | Yes   | Update my profile                           |
-| PUT    | `/api/users/me/password`      | Yes   | Change password                             |
-| GET    | `/api/users/me/balance`       | Yes   | Get my credit balance                       |
-| GET    | `/api/users/`                 | Admin | List all users                              |
-| DELETE | `/api/users/{id}`             | Admin | Delete a user                               |
-| GET    | `/api/activities/`            | No    | List activities (supports filtering)        |
-| POST   | `/api/activities/`            | Yes   | Create an activity                          |
-| PUT    | `/api/activities/{id}`        | Yes   | Update activity (owner only)                |
-| DELETE | `/api/activities/{id}`        | Yes   | Delete activity (owner or admin)            |
-| POST   | `/api/requests/`              | Yes   | Request a service                           |
-| GET    | `/api/requests/me`            | Yes   | My outgoing requests                        |
-| GET    | `/api/requests/incoming`      | Yes   | Incoming requests on my activities          |
-| PUT    | `/api/requests/{id}/accept`   | Yes   | Accept a request (triggers credit transfer) |
-| PUT    | `/api/requests/{id}/reject`   | Yes   | Reject a request                            |
-| PUT    | `/api/requests/{id}/cancel`   | Yes   | Cancel a request                            |
-| PUT    | `/api/requests/{id}/complete` | Yes   | Mark a request as complete                  |
-| GET    | `/api/transactions/me`        | Yes   | My transaction history                      |
+### 3.4 Build the frontend
 
-## How Time Credits Work
+```bash
+npm run build
+```
 
-- Every new user starts with **20 credits**.
-- 1 time token does not traslate to 1 hour of service, value your work as you consider.
-- When a service request is **accepted**, credits transfer instantly from requester to provider.
-- Credits are logged as transactions for full history tracking.
+Artifacts are written to `sandbank-client/dist`.
 
-## Notes
+## 4. Start Both Services Together
 
-- `venv/` and `.env` are not committed — recreate them on each machine using the steps above.
-- The SQLite database file `sandbank.db` is created automatically on first run.
+Terminal 1, backend:
+
+```bash
+cd SandBank.API
+.\venv\Scripts\Activate.ps1
+uvicorn main:app --reload --port 8000
+```
+
+Terminal 2, frontend:
+
+```bash
+cd sandbank-client
+npm run dev
+```
+
+At that point you should be able to:
+
+1. Open `http://localhost:5173`
+2. Register a user or seed the admin user
+3. Call backend docs at `http://localhost:8000/docs`
+
+## 5. Stripe Integration
+
+Stripe support is optional for local setup, but required if you want the `Buy Time Credits` flow to work.
+
+### What the current code expects
+
+- `/api/payments/checkout` creates a Stripe Checkout Session
+- Success redirect: `http://localhost:5173/credits?status=success`
+- Cancel redirect: `http://localhost:5173/credits?status=cancelled`
+- Webhook endpoint: `http://localhost:8000/api/payments/webhook`
+
+### Local Stripe steps
+
+1. Add `STRIPE_SECRET_KEY` to `.env`
+2. Install the Stripe CLI
+3. Run:
+
+```bash
+stripe listen --forward-to localhost:8000/api/payments/webhook
+```
+
+4. Copy the webhook signing secret from the CLI output into `STRIPE_WEBHOOK_SECRET`
+
+## 6. Useful Commands
+
+### Backend
+
+| Command                                 | Purpose                       |
+| --------------------------------------- | ----------------------------- |
+| `uvicorn main:app --reload --port 8000` | Start API in development mode |
+| `python create_admin.py`                | Seed the default admin user   |
+
+### Frontend
+
+| Command           | Purpose                            |
+| ----------------- | ---------------------------------- |
+| `npm run dev`     | Start the Vite dev server          |
+| `npm run build`   | Produce a production build         |
+| `npm run preview` | Preview the built frontend locally |
+| `npm run lint`    | Run ESLint                         |
+
+## 7. Verification Checklist
+
+After setup, verify the environment with this checklist:
+
+1. Backend server starts without import errors
+2. `http://localhost:8000/docs` loads
+3. Frontend dev server starts without dependency errors
+4. `http://localhost:5173` loads the home page
+5. Registering a new user returns you to the home page with an authenticated session
+
+## 8. Troubleshooting
+
+| Problem                                | Likely cause                                             | Action                                                              |
+| -------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------- |
+| `ModuleNotFoundError` on backend start | Virtual environment not active or packages not installed | Activate the venv and rerun `pip install -r requirements.txt`       |
+| Browser request fails to reach API     | Backend not running or wrong base URL                    | Check `uvicorn` output and `axiosInstance.ts`                       |
+| SQLite operational errors              | Corrupt or stale local DB file                           | Stop the API, remove `sandbank.db`, restart                         |
+| Stripe webhook verification fails      | Wrong webhook secret                                     | Replace `STRIPE_WEBHOOK_SECRET` with the value from `stripe listen` |
+| Port `8000` or `5173` is busy          | Existing process already bound                           | Stop the old process or run the service on a different port         |
+
+## 9. Repository Layout Reference
+
+```text
+SandBank-dev/
+├── SandBank.API/
+│   ├── main.py
+│   ├── config.py
+│   ├── database.py
+│   ├── create_admin.py
+│   ├── requirements.txt
+│   └── sandbank.db          # created locally on first run
+├── sandbank-client/
+│   ├── package.json
+│   ├── src/
+│   └── dist/                # created by npm run build
+└── docs/
+```
