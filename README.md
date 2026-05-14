@@ -1,6 +1,6 @@
 # SandBank
 
-## Purpose
+## Installation Guide
 
 This guide brings up the current local development environment for the repository as implemented today:
 
