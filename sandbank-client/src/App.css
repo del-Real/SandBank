@@ -149,6 +149,7 @@ header {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
+  min-height: 13rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -300,11 +301,19 @@ header {
   margin-top: 0.5rem;
 }
 
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* ── Rating form ── */
 .rating-form {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .stars-input {
